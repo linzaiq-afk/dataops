@@ -7,3 +7,17 @@ flowchart TD
     E --> F["MART: mart_sales_daily, mart_orders_status, mart_returns_daily"]
     F --> G["BI"]
 ```
+## Production Pipeline
+
+Pipeline запускается ежедневно в 06:00.
+
+1. Получение данных из PostgreSQL, DummyJSON API и Returns CSV.
+2. Сохранение исходных данных в RAW.
+3. Очистка и подготовка данных в STAGING.
+4. Формирование бизнес-таблиц в CORE.
+5. Проверка качества данных (Data Quality).
+6. Обновление витрин MART.
+7. Предоставление обновлённых данных для BI.
+
+При временной ошибке загрузки выполняются повторные попытки (Retry).
+Результаты выполнения и ошибки записываются в логи.
