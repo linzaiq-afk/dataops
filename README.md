@@ -79,5 +79,81 @@ DataOps-платформа для интернет-магазина:
 
 - [Практика 1. Введение в DataOps](docs/practice-01-as-is.md)
 - [Правила команды](docs/team-dataops-rules.md)
+## Лабораторная №2 — Docker и PostgreSQL
+
+### Подготовка окружения
+
+1. Установить Docker Desktop.
+2. Создать файл `.env` на основе `.env.example`.
+3. Задать собственный пароль `POSTGRES_PASSWORD`.
+4. Запустить PostgreSQL:
+
+   docker compose up -d
+
+5. Проверить контейнер:
+
+   docker compose ps
+
+### Создание таблиц PostgreSQL
+
+После запуска контейнера выполнить:
+
+```powershell
+docker compose exec -T postgres psql -U dataops -d shop < sql/init_ops.sql
+```
+```powershell
+
+Get-Content -Raw "sql/init_ops.sql" | docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U dataops -d shop
+```
+Скрипт создаёт схему `ops` и таблицы `customers` и `orders`.
+
+### Загрузка sample-данных
+
+В папке `data/samples/` находятся два файла с 200 записями каждый:
+
+- `customers_sample.csv` — покупатели.
+- `orders_sample.csv` — заказы.
+
+Сначала скопировать CSV-файлы в контейнер:
+
+```bash
+docker compose cp data/samples/customers_sample.csv postgres:/tmp/customers_sample.csv
+docker compose cp data/samples/orders_sample.csv postgres:/tmp/orders_sample.csv
+```
+
+Затем подключиться к PostgreSQL:
+
+```bash
+docker compose exec postgres psql -U dataops -d shop
+```
+
+Выполнить SQL-команды:
+
+```sql
+COPY ops.customers FROM '/tmp/customers_sample.csv' WITH (FORMAT csv, HEADER true);
+COPY ops.orders FROM '/tmp/orders_sample.csv' WITH (FORMAT csv, HEADER true);
+```
+
+Проверить количество записей:
+
+```sql
+SELECT COUNT(*) FROM ops.customers;
+SELECT COUNT(*) FROM ops.orders;
+```
+
+Ожидаемый результат — 200 записей в каждой таблице.
+
+### Проверка связей между таблицами
+
+Проверить, что заказы связаны с покупателями:
+
+```sql
+SELECT COUNT(*)
+FROM ops.orders o
+JOIN ops.customers c
+    ON o.customer_id = c.customer_id;
+```
+
+Ожидаемый результат — 200 совпадений.
 
 *Дисциплина: «Основы DataOps»*
