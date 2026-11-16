@@ -10,13 +10,11 @@
 
 ## Что сделано
 
-| Лаба | Тема | Результат | Отчёт |
-|---|---|---|---|
-| 2 | Жизненный цикл данных, Docker и PostgreSQL | 3 источника, схема слоёв, sample-данные Olist, PostgreSQL 16, схема `ops` | [docs/labs/lab-02.md](docs/labs/lab-02.md) |
-| 3 | Data Pipelines и оркестрация | идемпотентная загрузка returns, загрузчики API и ops, генератор CSV, оркестратор с retry/timeout | [docs/labs/lab-03.md](docs/labs/lab-03.md) |
-| 4 | Data as Code и Git | dbt-проект, `source()`/`stg_orders`, описания колонок, issue #3, schema change drill | [docs/labs/lab-04.md](docs/labs/lab-04.md) |
-
-Подготовка к защите: [docs/DEFENSE.md](docs/DEFENSE.md).
+| Лаба | Тема | Результат |
+|---|---|---|
+| 2 | Жизненный цикл данных, Docker и PostgreSQL | 3 источника, схема слоёв, sample-данные Olist, PostgreSQL 16, схема `ops` |
+| 3 | Data Pipelines и оркестрация | идемпотентная загрузка returns, загрузчики API и ops, генератор CSV, оркестратор с retry/timeout |
+| 4 | Data as Code и Git | dbt-проект, `source()`/`stg_orders`, описания колонок, issue #3, schema change drill |
 
 ---
 
@@ -241,8 +239,6 @@ dbt test --project-dir dbt --profiles-dir dbt --select stg_orders
 4. проверить `dbt run` и `dbt test`;
 5. сделать коммит и merge в `main`.
 
-Подробный разбор — в [docs/labs/lab-04.md](docs/labs/lab-04.md).
-
 ---
 
 ## Источники данных
@@ -286,7 +282,3 @@ referential integrity, validity, freshness, business rules) — следующа
 - [Критерии оценки](docs/GRADING.md)
 - [Архитектура](docs/architecture.md)
 - [Источники данных](docs/sources.md)
-- [Лаба 2](docs/labs/lab-02.md)
-- [Лаба 3](docs/labs/lab-03.md)
-- [Лаба 4](docs/labs/lab-04.md)
-- [Подготовка к защите](docs/DEFENSE.md)
