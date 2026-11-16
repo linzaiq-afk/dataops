@@ -125,6 +125,15 @@ Get-Content -Raw sql/init_ops.sql | docker compose exec -T postgres psql -v ON_E
 Get-Content -Raw sql/init_raw.sql | docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U dataops -d shop
 ```
 
+Если вы поменяли `POSTGRES_PASSWORD` после первого запуска, старый пароль остался
+в volume. Для чистого перезапуска (данные будут удалены):
+
+```powershell
+docker compose down -v
+docker compose up -d
+# затем заново загрузите sample-данные из шага 4
+```
+
 ### 4. Загрузка sample-данных Olist (лаба 2)
 
 ```powershell
