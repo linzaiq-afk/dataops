@@ -1,12 +1,15 @@
 version: 2
 
 sources:
-  - name: ops
-    schema: ops
-    tables:
-      - name: orders
-
   - name: raw
+    description: "Слой RAW: данные как пришли из источников, с техническими полями."
     schema: raw
     tables:
+      - name: raw_orders
+        description: "Снимок заказов из операционной PostgreSQL."
+      - name: raw_customers
+        description: "Снимок покупателей из операционной PostgreSQL."
       - name: raw_returns
+        description: "Возвраты из ежедневных CSV-файлов."
+      - name: raw_inventory
+        description: "Товары, цены и остатки из DummyJSON API."

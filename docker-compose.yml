@@ -2,8 +2,20 @@ services:
   postgres:
     image: postgres:16
     environment:
-      POSTGRES_USER: dataops
+      POSTGRES_USER: ${POSTGRES_USER:-dataops}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: shop
+      POSTGRES_DB: ${POSTGRES_DB:-shop}
     ports:
       - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # При первом запуске (пустой volume) SQL-файлы создают схемы ops и raw.
+      - ./sql:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-dataops} -d ${POSTGRES_DB:-shop}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata:
