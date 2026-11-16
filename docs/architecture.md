@@ -1,41 +1,55 @@
+# Архитектура
+
+## Целевая схема слоёв
+
 ```mermaid
 flowchart TD
-    A["Sources"] --> B["Ingestion"]
-    B --> C["RAW: raw_orders, raw_customers, raw_products, raw_returns"]
-    C --> D["STAGING: stg_orders, stg_customers, stg_products, stg_returns"]
+    A["Sources: PostgreSQL / DummyJSON / CSV"] --> B["Ingestion: Python"]
+    B --> C["RAW: raw_orders, raw_customers, raw_returns, raw_inventory"]
+    C --> D["STAGING: stg_orders, stg_customers, stg_returns, stg_inventory"]
     D --> E["CORE: fact_orders, dim_customers, dim_products, fact_returns"]
-    E --> F["MART: mart_sales_daily, mart_orders_status, mart_returns_daily"]
-    F --> G["BI"]
+    E --> F["MART: mart_sales_daily, mart_product_performance, mart_customer_metrics"]
+    F --> G["BI / Analytics"]
 ```
-## Production Pipeline
 
-Pipeline запускается ежедневно в 06:00.
+## Что реализовано к лабораторной №4
 
-1. Получение данных из PostgreSQL, DummyJSON API и Returns CSV.
-2. Сохранение исходных данных в RAW.
-3. Очистка и подготовка данных в STAGING.
-4. Формирование бизнес-таблиц в CORE.
-5. Проверка качества данных (Data Quality).
-6. Обновление витрин MART.
-7. Предоставление обновлённых данных для BI.
+| Слой | Статус | Файлы |
+|---|---|---|
+| Источники | готово | PostgreSQL `ops`, DummyJSON API, returns CSV |
+| Ingestion | готово | `ingestion/load_ops_snapshot.py`, `ingestion/load_inventory.py`, `ingestion/load_returns.py` |
+| RAW | готово | `sql/init_raw.sql`: `raw_orders`, `raw_customers`, `raw_returns`, `raw_inventory` |
+| STAGING | готово | `dbt/models/staging/stg_orders.sql` |
+| CORE | план | следующие лабораторные |
+| MART | план | следующие лабораторные |
+| BI | план | следующие лабораторные |
 
-При временной ошибке загрузки выполняются повторные попытки (Retry).
-Результаты выполнения и ошибки записываются в логи.
+## Production pipeline
 
-## Development Pipeline
+Ежедневный запуск (`dag_orchestrator.py`):
 
-1. Создание ветки `lab-02` от `main`.
-2. Выполнение лабораторной и изменение файлов.
-3. Сохранение изменений через Commit.
-4. Создание Pull Request из `lab-02` в `main`.
-5. Code Review — проверка изменений и тестов.
-6. Исправление ошибок при необходимости.
-7. Merge в `main` после проверки.
+```text
+load_ops_snapshot → load_api_inventory → load_returns
+    → raw_quality_check → dbt_run → dbt_test
+```
 
-## Environment Pipeline
+- при ошибке задача повторяется (по умолчанию 2 повтора);
+- на каждую попытку задан timeout;
+- при окончательной ошибке pipeline останавливается с кодом 1;
+- каждый шаг пишет строки в лог.
 
-1. DEV (Development) — разработка Python-скриптов и SQL-запросов, проверка на небольших sample-данных.
-2. CI (Continuous Integration) — автоматический запуск тестов и проверок после изменений в Git.
-3. PROD (Production) — ежедневное выполнение Pipeline, обработка рабочих данных и обновление аналитических витрин MART.
+## Development pipeline
 
-Основное отличие окружений: в DEV используются тестовые данные, в CI проверяется корректность изменений, а в PROD выполняется рабочая обработка данных.
+1. Создать ветку от `main` (например, `feature/stg-orders`).
+2. Внести изменения и сделать коммиты.
+3. Push ветки и Pull Request в `main`.
+4. Проверить diff, при необходимости исправить.
+5. Merge после проверки.
+
+## Environment pipeline
+
+| Окружение | Данные | Что происходит |
+|---|---|---|
+| DEV | sample 200 строк | разработка и ручные запуски скриптов |
+| CI | sample | автоматические проверки (следующая лаба) |
+| PROD | полный Olist | ежедневный pipeline и обновление витрин |
