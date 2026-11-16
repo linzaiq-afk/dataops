@@ -2,11 +2,18 @@ version: 2
 
 models:
   - name: stg_orders
-    description: "Очищенная модель заказов из операционной базы данных."
+    description: "Очищенная модель заказов из слоя RAW: приведены типы и переименованы поля."
     columns:
       - name: order_id
         description: "Уникальный идентификатор заказа."
+        data_tests:
+          - not_null
+          - unique
       - name: customer_id
         description: "Идентификатор клиента, сделавшего заказ."
+        data_tests:
+          - not_null
       - name: order_status
         description: "Текущий статус заказа (delivered, shipped и т.д.)."
+      - name: purchased_at
+        description: "Дата и время оформления заказа."
